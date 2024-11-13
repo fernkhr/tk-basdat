@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="text-align: center;">
+<h5 style="margin-top: 70px;">Pilih Role untuk Registrasi</h5>
+<form method="post">
+    {% csrf_token %}
+    <label for="role">Pilih role : </label>
+    <select name="role" required>
+        <option value="">--Pilih role--</option>
+        <option value="Pengguna">Pengguna</option>
+        <option value="Pekerja">Pekerja</option>
+    </select>
+    <br>
+    <button type="submit">Next</button>
+</form>
+</div>
+{% endblock %}

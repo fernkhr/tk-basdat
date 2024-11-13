@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="text-align: center;">
+<h5 style="margin-top: 70px;">Register Pekerja</h5>
+<form method="post">
+    {% csrf_token %}
+    <label for="nama">Nama :</label>
+    <input type="text" name="nama" required>
+    <br>
+
+    <label for="password">Password :</label>
+    <input type="password" name="password" required>
+    <br>
+
+    <label for="jenis_kelamin">Jenis kelamin :</label>
+        <input type="radio" id="pria" name="jenis_kelamin" value="Pria">
+        <label for="pria">L</label>
+        
+        <input type="radio" id="wanita" name="jenis_kelamin" value="Wanita">
+        <label for="wanita">P</label>
+    <br>
+
+    <label for="no_hp">No Hp :</label>
+    <input type="text" name="no_hp" required>
+    <br>
+
+    <label for="tanggal_lahir">Tanggal lahir :</label>
+    <input type="date" name="tanggal_lahir" required>
+    <br>
+
+    <label for="alamat">Alamat :</label>
+    <textarea name="alamat" required></textarea>
+    <br>
+
+    <label for="nama_bank">Nama bank :</label>
+    <select name="nama_bank" required>
+        <option value="">--Pilih nama bank--</option>
+        <option value="GoPay">GoPay</option>
+        <option value="OVO">OVO</option>
+        <option value="Virtual Account BCA">Virtual Account BCA</option>
+        <option value="Virtual Account BNI">Virtual Account BNI</option>
+        <option value="Virtual Account Mandiri">Virtual Account Mandiri</option>
+    </select>
+    <br>
+
+    <label for="no_rekening">No Rekening :</label>
+    <input type="text" name="no_rekening" required>
+    <br>
+
+    <label for="npwp">NPWP :</label>
+    <input type="text" name="npwp" required>
+    <br>
+
+    <label for="url_foto">URL foto :</label>
+    <input type="text" name="url_foto" required>
+    <br>
+
+    <!-- Input tambahan lainnya untuk pekerja -->
+    <button type="submit">Register</button>
+</form>
+</div>
+{% endblock %}
