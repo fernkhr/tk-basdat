@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="text-align: center;">
+<h5 style="margin-top: 70px;">Register Pengguna</h5>
+<form method="post">
+    {% csrf_token %}
+    
+    <label for="nama">Nama :</label>
+    <input type="text" name="nama" required>
+    <br>
+
+    <label for="password">Password :</label>
+    <input type="password" name="password" required>
+    <br>
+
+    <label for="jenis_kelamin">Jenis kelamin :</label>
+        <input type="radio" id="pria" name="jenis_kelamin" value="Pria">
+        <label for="pria">L</label>
+        
+        <input type="radio" id="wanita" name="jenis_kelamin" value="Wanita">
+        <label for="wanita">P</label>
+    <br>
+
+    <label for="no_hp">No Hp :</label>
+    <input type="text" name="no_hp" required>
+    <br>
+
+    <label for="tanggal_lahir">Tanggal lahir :</label>
+    <input type="date" name="tanggal_lahir" required>
+    <br>
+
+    <label for="alamat">Alamat :</label>
+    <textarea name="alamat" required></textarea>
+    <br>
+
+    <button type="submit">Register</button>
+</form>
+</div>
+{% endblock %}
