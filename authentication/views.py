@@ -6,6 +6,9 @@ from django.db import IntegrityError
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect
 
+def authentication(request):
+    return render(request, 'authentication.html')
+
 # View untuk login
 def user_login(request):
     if request.method == "POST":
@@ -18,7 +21,7 @@ def user_login(request):
         if user is not None:
             login(request, user)
             messages.success(request, "Login berhasil!")
-            return redirect('homepage')  # Redirect ke homepage setelah login sukses
+            return redirect('dashboard:dashboard')  # Redirect ke dashboard setelah login sukses
         else:
             messages.error(request, "Nomor Hp atau password salah. Silakan coba lagi!")
     
@@ -50,7 +53,7 @@ def register_pengguna(request):
 
         # Validasi nomor HP yang sudah terdaftar
         if User.objects.filter(username=no_hp).exists():
-            messages.error(request, "Nomor HP telah terdaftar. Silakan login.")
+            messages.error(request, "Nomor Hp telah terdaftar. Silakan login!")
             return redirect('authentication:user_login')
 
         try:
@@ -64,10 +67,10 @@ def register_pengguna(request):
                 tanggal_lahir=tanggal_lahir,
                 alamat=alamat
             )
-            messages.success(request, "Registrasi berhasil. Silakan login.")
+            messages.success(request, "Registrasi berhasil. Silakan login!")
             return redirect('authentication:user_login')
         except IntegrityError:
-            messages.error(request, "Gagal registrasi. Data tidak valid.")
+            messages.error(request, "Gagal registrasi. Data tidak valid")
 
     return render(request, 'register_pengguna.html')
 
@@ -86,17 +89,17 @@ def register_pekerja(request):
 
         # Validasi nomor HP yang sudah terdaftar
         if User.objects.filter(username=no_hp).exists():
-            messages.error(request, "Nomor HP telah terdaftar. Silakan login.")
+            messages.error(request, "Nomor Hp telah terdaftar. Silakan login!")
             return redirect('authentication:user_login')
 
         # Validasi pasangan nama bank dan no rekening yang sudah ada
         if Pekerja.objects.filter(nama_bank=nama_bank, no_rekening=no_rekening).exists():
-            messages.error(request, "Pasangan nama bank dan no rekening sudah terdaftar.")
+            messages.error(request, "Pasangan nama bank dan no rekening sudah terdaftar")
             return redirect('authentication:user_register')
             
         # Validasi NPWP yang sudah terdaftar
         if Pekerja.objects.filter(npwp=npwp).exists():
-            messages.error(request, "NPWP telah terdaftar.")
+            messages.error(request, "NPWP telah terdaftar")
             return redirect('authentication:user_register')
 
         try:
@@ -114,9 +117,9 @@ def register_pekerja(request):
                 npwp=npwp,
                 url_foto=url_foto
             )
-            messages.success(request, "Registrasi berhasil. Silakan login.")
+            messages.success(request, "Registrasi berhasil. Silakan login!")
             return redirect('authentication:user_login')
         except IntegrityError:
-            messages.error(request, "Gagal registrasi. Data tidak valid.")
+            messages.error(request, "Gagal registrasi. Data tidak valid")
 
     return render(request, 'register_pekerja.html')
