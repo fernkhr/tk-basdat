@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Category List</title>
+    <style>
+        .category, .subcategory { margin: 10px 0; }
+        .category { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <form method="get" action="{% url 'category_list' %}">
+        <select name="category">
+            <option value="">Select Category</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="subcategory" placeholder="Nama Subkategori">
+        <button type="submit">Search</button>
+    </form>
+
+    <div>
+        {% for category in categories %}
+            <div class="category">{{ category.name }}</div>
+            <ul>
+                {% for subcategory in category.subcategories.all %}
+                    <li class="subcategory">{{ subcategory.name }}</li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    </div>
+</body>
+</html>
