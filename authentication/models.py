@@ -45,3 +45,9 @@ class Pekerja(models.Model):
     def __str__(self):
         return self.nama
 
+class CustomUser(User):
+    ROLES = [
+        ('pengguna', 'Pengguna'),
+        ('pekerja', 'Pekerja'),
+    ]
+    role = models.CharField(max_length=10, choices=ROLES, default='Pengguna')
