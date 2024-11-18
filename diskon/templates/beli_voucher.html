@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembelian Voucher</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .modal-dialog-centered {
+            margin-top: 15%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Modal -->
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                {% if status == "sukses" %}
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">SUKSES</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Selamat! Anda berhasil membeli voucher kode <strong>{{ kode_voucher }}</strong>.</p>
+                    <p>Voucher ini akan berlaku hingga tanggal <strong>{{ hari_berlaku }}</strong> hari dari sekarang dengan kuota penggunaan sebanyak <strong>{{ kuota }}</strong> kali.</p>
+                </div>
+                {% else %}
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">GAGAL</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Maaf, saldo Anda tidak cukup untuk membeli voucher ini.</p>
+                </div>
+                {% endif %}
+                <div class="modal-footer">
+                    <a href="/diskon/" class="btn btn-primary">Tutup</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

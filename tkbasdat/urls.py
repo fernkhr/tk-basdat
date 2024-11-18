@@ -20,6 +20,11 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),  # URL untuk admin Django
-    path('',include('authentication.urls')),
-    path('dashboard/',include('dashboard.urls')),
+    path('', include('authentication.urls')),  # URL untuk authentication
+    path('dashboard/', include('dashboard.urls')),  # URL untuk dashboard
+    path('testimoni/', include('testimoni.urls')),  # URL untuk testimoni
+    path('diskon/', include('diskon.urls')),  # URL untuk diskon
+    path('mypay/', include('mypay.urls')),  # Tambahkan ini
+    path('pekerjaan/', include('pekerjaan.urls')),  # Tambahkan ini
+
 ]

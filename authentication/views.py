@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from django.http import JsonResponse, HttpResponseRedirect
 from .models import Pengguna, Pekerja
 from django.db import IntegrityError
+from django.contrib.auth import authenticate, login, logout
+from django.http import HttpResponseRedirect
 
 def authentication(request):
     return render(request, 'authentication.html')
@@ -20,20 +20,6 @@ def user_login(request):
         
         if user is not None:
             login(request, user)
-
-            # Set session
-            if hasattr(user, 'pengguna'):
-                request.session["user"] = {
-                    "username": user.username,
-                    "role": "pengguna",
-                    "nama": user.pengguna.nama,
-                }
-            elif hasattr(user, 'pekerja'):
-                request.session["user"] = {
-                    "username": user.username,
-                    "role": "pekerja",
-                    "nama": user.pekerja.nama,
-                }
             messages.success(request, "Login berhasil!")
             return redirect('dashboard:dashboard')  # Redirect ke dashboard setelah login sukses
         else:
@@ -44,15 +30,9 @@ def user_login(request):
 # View untuk logout
 def user_logout(request):
     logout(request)
-
-    # Hapus session
-    if "user" in request.session:
-        del request.session["user"]
-
     messages.success(request, "Logout berhasil!")
     return redirect('authentication:user_login')  # Redirect ke halaman login setelah logout
 
-# View untuk memilih registrasi
 def user_register(request):
     if request.method == "POST":
         role = request.POST.get("role")
@@ -62,7 +42,6 @@ def user_register(request):
             return redirect('authentication:register_pekerja')
     return render(request, 'register_choice.html')
 
-# View untuk registrasi pengguna
 def register_pengguna(request):
     if request.method == "POST":
         nama = request.POST.get("nama")
@@ -95,7 +74,6 @@ def register_pengguna(request):
 
     return render(request, 'register_pengguna.html')
 
-# View untuk registrasi pekerja
 def register_pekerja(request):
     if request.method == "POST":
         nama = request.POST.get("nama")
@@ -145,11 +123,3 @@ def register_pekerja(request):
             messages.error(request, "Gagal registrasi. Data tidak valid")
 
     return render(request, 'register_pekerja.html')
-
-# View untuk mendapatkan data user
-def get_user(request):
-    if "user" not in request.session:
-        return JsonResponse({"error": "Pengguna belum login"}, status=401)
-
-    user_data = request.session["user"]
-    return JsonResponse(user_data)
