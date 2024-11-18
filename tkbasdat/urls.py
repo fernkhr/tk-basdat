@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),  # URL untuk admin Django
     path('',include('authentication.urls')),
     path('dashboard/',include('dashboard.urls')),
+    path('homepage/', include('homepage.urls')),
 ]
