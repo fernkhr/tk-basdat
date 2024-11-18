@@ -1,9 +1,9 @@
 
-
+{% extends "base.html" %}
 {% block content %}
   
 
-  <h3>Profil Saya</h3>
+  
 
   <form method="POST" action="{% url 'dashboard:dashboard' %}">
     {% csrf_token %}
