@@ -2,24 +2,28 @@
 {% extends "base.html" %}
 {% block content %}
   
-
+<style>
+body {
+    padding-top: 10px; 
+}
+</style>
   
-
+<div style="padding-top: 80px;">
   <form method="POST" action="{% url 'dashboard:dashboard' %}">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Update</button>
+    <!-- <button onclick="location.href='{% url 'dashboard:update_dashboard' %}'">Edit Dashboard</button> -->
   </form>
 
 
-  {% if is_pengguna %}
+  {% if role == 'pengguna' %}
     <!-- Profil Pengguna -->
     <p><strong>Nama :</strong> {{ profile.nama }}</p>
     <p><strong>Jenis kelamin :</strong> {{ profile.jenis_kelamin }}</p>
     <p><strong>No Hp :</strong> {{ profile.no_hp }}</p>
     <p><strong>Tanggal lahir :</strong> {{ profile.tanggal_lahir }}</p>
     <p><strong>Alamat :</strong> {{ profile.alamat }}</p>
-    <p><strong>Saldo MyPay :</strong> {{ profile.saldo_mypay }}</p>
+    <p><strong>Saldo MyPay :</strong> {{ profile.saldo }}</p>
     <p><strong>Level :</strong> {{ profile.level }}</p>
   {% else %}
     <!-- Profil Pekerja -->
@@ -28,12 +32,18 @@
     <p><strong>No Hp :</strong> {{ profile.no_hp }}</p>
     <p><strong>Tanggal lahir :</strong> {{ profile.tanggal_lahir }}</p>
     <p><strong>Alamat :</strong> {{ profile.alamat }}</p>
+    <p><strong>Saldo MyPay :</strong> {{ profile.saldo }}</p>
     <p><strong>Nama bank :</strong> {{ profile.nama_bank }}</p>
     <p><strong>No rekening :</strong> {{ profile.no_rekening }}</p>
     <p><strong>NPWP :</strong> {{ profile.npwp }}</p>
-    <p><strong>URL foto :</strong> {{ profile.url_foto }}</p>
+    <p><strong>URL foto :</strong> {{ profile.link_foto }}</p>
     <p><strong>Rating :</strong> {{ profile.rating }}</p>
     <p><strong>Jumlah pesanan selesai :</strong> {{ profile.jumlah_pesanan_selesai }}</p>
     <p><strong>Kategori pekerjaan :</strong> {{ profile.kategori_pekerjaan }}</p>
   {% endif %}
+
+  {% if authenticated %}
+        <a href="{% url 'dashboard:update_dashboard' %}" class="btn btn-primary">Edit Profile</a>
+  {% endif %}
+</div>
 {% endblock %}
