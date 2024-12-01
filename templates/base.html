@@ -20,14 +20,44 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          {% if request.user.is_authenticated %}
-            {% if user.role == 'pengguna' %}
+          {% if authenticated %}
+            {% if role == 'pengguna' %}
             <li class="nav-item">
               <a class="nav-link" href="{% url 'dashboard:dashboard' %}">Dashboard</a>
             </li>
-            {% elif user.role == 'pekerja' %}
+            <li class="nav-item">
+              <a class="nav-link" >Homepage</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" >MyPay</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" >Kelola Pesanan Saya</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" >Diskon</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'authentication:user_logout' %}">Logout</a>
+            </li>
+            {% elif role == 'pekerja' %}
             <li class="nav-item">
               <a class="nav-link" href="{% url 'dashboard:dashboard' %}">Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" >Homepage</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" >Kelola Pekerjaan Saya</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" >Kelola Status Pekerjaan</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" >MyPay</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'authentication:user_logout' %}">Logout</a>
             </li>
             {% endif %}
           {% else %}
