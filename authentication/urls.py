@@ -8,7 +8,7 @@ urlpatterns = [
     path('', views.authentication, name='authentication'),
     path('login/', views.user_login, name='user_login'),
     path('logout/', views.user_logout, name='user_logout'),
-    path('register/', views.user_register, name='user_register'),  # Halaman pemilihan role
-    path('register/pengguna/', views.register_pengguna, name='register_pengguna'),  # Halaman registrasi Pengguna
-    path('register/pekerja/', views.register_pekerja, name='register_pekerja'),  # Halaman registrasi Pekerja
+    path('register/', views.user_register, name='user_register'),  
+    path('register/pengguna/', views.register_pengguna, name='register_pengguna'),  
+    path('register/pekerja/', views.register_pekerja, name='register_pekerja'),  
 ]
