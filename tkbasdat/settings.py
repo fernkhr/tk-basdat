@@ -40,7 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'authentication',
-    'dashboard'
+    'dashboard',
+    'testimoni',
+    'diskon',
+    'mypay',
+    'pekerjaan',
 ]
 
 MIDDLEWARE = [
