@@ -57,7 +57,9 @@ def index(request):
 
     return render(request, 'testimoni/index.html', {
         'testimoni': testimoni,
-        'available_orders': available_orders
+        'available_orders': available_orders,
+        'role': role,
+        'authenticated': True
     })
 
 
@@ -146,5 +148,7 @@ def create_testimoni(request):
 
     return render(request, 'testimoni/create.html', {
         'id_pemesanan': id_pemesanan,
-        'order_detail': order_detail
+        'order_detail': order_detail,
+        'role': role,
+        'authenticated': True
     })

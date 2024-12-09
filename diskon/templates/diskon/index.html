@@ -111,26 +111,46 @@ document.querySelectorAll('.buy-voucher').forEach(button => {
         Swal.fire({
             title: 'Beli Voucher',
             html: `
-                <p>Apakah Anda yakin ingin membeli voucher dengan detail:</p>
+                <p>Detail Voucher:</p>
                 <ul class="text-start">
                     <li>Kode: ${kode}</li>
                     <li>Harga: Rp ${harga}</li>
                     <li>Berlaku: ${hari} hari</li>
                     <li>Kuota: ${kuota}x penggunaan</li>
                 </ul>
+                <div class="form-group mt-3">
+                    <label for="metode-bayar">Pilih Metode Pembayaran:</label>
+                    <select class="form-select mt-2" id="metode-bayar" required>
+                        <option value="" disabled selected>Pilih metode pembayaran</option>
+                        {% for m in metode_bayar %}
+                            <option value="{{ m.id }}">{{ m.nama }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             `,
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Ya, Beli',
             cancelButtonText: 'Batal',
-            reverseButtons: true
+            reverseButtons: true,
+            preConfirm: () => {
+                const metodeBayarId = document.getElementById('metode-bayar').value;
+                if (!metodeBayarId) {
+                    Swal.showValidationMessage('Silakan pilih metode pembayaran');
+                }
+                return { metodeBayarId };
+            }
         }).then((result) => {
             if (result.isConfirmed) {
                 fetch(`/diskon/beli/${kode}/`, {
                     method: 'POST',
                     headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        metode_bayar_id: result.value.metodeBayarId
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -140,7 +160,7 @@ document.querySelectorAll('.buy-voucher').forEach(button => {
                             html: `
                                 <p>${data.message}</p>
                                 <p class="mt-2">Voucher kode <strong>${kode}</strong> telah ditambahkan ke akun Anda.</p>
-                                <p class="mt-2">Saldo Anda sekarang: Rp ${parseInt(data.saldo_baru).toLocaleString('id-ID')}</p>
+                                ${data.saldo_baru ? `<p class="mt-2">Saldo MyPay Anda sekarang: Rp ${parseInt(data.saldo_baru).toLocaleString('id-ID')}</p>` : ''}
                             `,
                             icon: 'success'
                         }).then(() => {
