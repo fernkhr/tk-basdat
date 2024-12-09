@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Testimoni</h2>
+    </div>
+
+    <!-- Pesanan yang Tersedia untuk Testimoni -->
+    {% if available_orders %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Pesanan yang Dapat Diberi Testimoni</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tanggal Pesanan</th>
+                            <th>Jenis Layanan</th>
+                            <th>Pekerja</th>
+                            <th>Total Biaya</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in available_orders %}
+                        <tr>
+                            <td>{{ order.tglpekerjaan|date:"d M Y" }}</td>
+                            <td>{{ order.namasubkategori }}</td>
+                            <td>{{ order.nama_pekerja }}</td>
+                            <td>Rp {{ order.totalbiaya|floatformat:0 }}</td>
+                            <td>
+                                <a href="{% url 'create_testimoni' %}?id_pemesanan={{ order.id }}"
+                                   class="btn btn-primary btn-sm">
+                                    Beri Testimoni
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Daftar Testimoni yang Sudah Ada -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Semua Testimoni</h5>
+        </div>
+        <div class="card-body">
+            {% for t in testimoni %}
+            <div class="border-bottom pb-3 mb-3">
+                <div class="d-flex justify-content-between">
+                    <h6 class="mb-1">{{ t.namapelanggan }}</h6>
+                    <small class="text-muted">{{ t.tgl|date:"d M Y" }}</small>
+                </div>
+                <div class="mb-2">
+                    <span class="badge bg-primary">{{ t.namasubkategori }}</span>
+                    <span class="badge bg-success">Rating: {{ t.rating }}/10</span>
+                </div>
+                <p class="mb-1">{{ t.teks }}</p>
+                <small class="text-muted">Pekerja: {{ t.namapekerja }}</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

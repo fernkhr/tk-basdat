@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Detail Pesanan -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Detail Pesanan</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Jenis Layanan</dt>
+                        <dd class="col-sm-8">{{ order_detail.namasubkategori }}</dd>
+
+                        <dt class="col-sm-4">Pekerja</dt>
+                        <dd class="col-sm-8">{{ order_detail.nama_pekerja }}</dd>
+
+                        <dt class="col-sm-4">Tanggal Pengerjaan</dt>
+                        <dd class="col-sm-8">{{ order_detail.tglpekerjaan|date:"d M Y" }}</dd>
+
+                        <dt class="col-sm-4">Total Biaya</dt>
+                        <dd class="col-sm-8">Rp {{ order_detail.totalbiaya|floatformat:0 }}</dd>
+                    </dl>
+                </div>
+            </div>
+
+                            <div class="card-body">
+                    <form id="testimoniForm" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="id_pemesanan" value="{{ id_pemesanan }}">
+
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Rating</label>
+                            <select class="form-select" id="rating" name="rating" required>
+                                <option value="" selected disabled>Pilih Rating (1-10)</option>
+                                <option value="1">1 - Sangat Buruk</option>
+                                <option value="2">2 - Buruk</option>
+                                <option value="3">3 - Kurang Baik</option>
+                                <option value="4">4 - Cukup Buruk</option>
+                                <option value="5">5 - Cukup</option>
+                                <option value="6">6 - Cukup Baik</option>
+                                <option value="7">7 - Baik</option>
+                                <option value="8">8 - Sangat Baik</option>
+                                <option value="9">9 - Istimewa</option>
+                                <option value="10">10 - Sempurna</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="komentar" class="form-label">Komentar</label>
+                            <textarea
+                                class="form-control"
+                                id="komentar"
+                                name="komentar"
+                                rows="4"
+                                placeholder="Tulis komentar Anda di sini..."
+                                required
+                            ></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="javascript:history.back()" class="btn btn-secondary">Kembali</a>
+                            <button type="submit" class="btn btn-primary">Submit Testimoni</button>
+                        </div>
+                    </form>
+                </div>
+        </div>
+    </div>
+</div>
+    <script>
+document.getElementById('testimoniForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch('', {  // Kosongkan URL karena kita submit ke URL yang sama
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: 'Berhasil!',
+                text: data.message,
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                window.location.href = "{% url 'testimoni_index' %}";
+            });
+        } else {
+            Swal.fire({
+                title: 'Error!',
+                text: data.message,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            title: 'Error!',
+            text: 'Terjadi kesalahan saat mengirim testimoni',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        console.error('Error:', error);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaksi MyPay</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Transaksi MyPay</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/mypay/">MyPay</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/homepage/">Homepage</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout/">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Form Transaksi -->
+    <div class="container">
+        <div class="form-container">
+            <h1 class="form-title">Form Transaksi</h1>
+            <form method="post">
+                <!-- TODO: Tambahkan CSRF token -->
+                <div class="mb-3">
+                    <label for="tanggal" class="form-label">Tanggal Transaksi:</label>
+                    <input type="text" id="tanggal" name="tanggal" class="form-control" value="{{ user_data.tanggal_transaksi }}" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="nama_user" class="form-label">Nama User:</label>
+                    <input type="text" id="nama_user" name="nama_user" class="form-control" value="{{ user_data.nama_user }}" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="saldo" class="form-label">Saldo User:</label>
+                    <input type="text" id="saldo" name="saldo" class="form-control" value="{{ user_data.saldo }}" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="kategori" class="form-label">Kategori Transaksi:</label>
+                    <select id="kategori" name="kategori" class="form-select" onchange="updateForm()">
+                        <option value="topup">Top-Up MyPay</option>
+                        <option value="bayar_jasa">Bayar Jasa</option>
+                        <option value="transfer">Transfer MyPay</option>
+                        <option value="withdrawal">Withdrawal</option>
+                    </select>
+                </div>
+
+                <!-- State 1 -->
+                <div id="state-topup" class="form-state mb-3">
+                    <label for="nominal_topup" class="form-label">Nominal:</label>
+                    <input type="number" id="nominal_topup" name="nominal_topup" class="form-control">
+                </div>
+
+                <!-- State 2 -->
+                <div id="state-bayar-jasa" class="form-state mb-3" style="display: none;">
+                    <label for="pesanan_jasa" class="form-label">Pesanan Jasa:</label>
+                    <select id="pesanan_jasa" name="pesanan_jasa" class="form-select">
+                        {% for jasa in pesanan_jasa %}
+                        <option value="{{ jasa.id }}">{{ jasa.nama }} - {{ jasa.harga }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- State 3 -->
+                <div id="state-transfer" class="form-state mb-3" style="display: none;">
+                    <label for="nohp_tujuan" class="form-label">No HP Tujuan:</label>
+                    <input type="text" id="nohp_tujuan" name="nohp_tujuan" class="form-control">
+                    <label for="nominal_transfer" class="form-label mt-3">Nominal:</label>
+                    <input type="number" id="nominal_transfer" name="nominal_transfer" class="form-control">
+                </div>
+
+                <!-- State 4 -->
+                <div id="state-withdrawal" class="form-state mb-3" style="display: none;">
+                    <label for="nama_bank" class="form-label">Nama Bank:</label>
+                    <select id="nama_bank" name="nama_bank" class="form-select">
+                        {% for bank in nama_bank %}
+                        <option value="{{ bank }}">{{ bank }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="no_rekening" class="form-label mt-3">No Rekening:</label>
+                    <input type="text" id="no_rekening" name="no_rekening" class="form-control">
+                    <label for="nominal_withdrawal" class="form-label mt-3">Nominal:</label>
+                    <input type="number" id="nominal_withdrawal" name="nominal_withdrawal" class="form-control">
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function updateForm() {
+            const category = document.getElementById('kategori').value;
+            document.querySelectorAll('.form-state').forEach(el => el.style.display = 'none');
+            if (category === 'topup') document.getElementById('state-topup').style.display = 'block';
+            if (category === 'bayar_jasa') document.getElementById('state-bayar-jasa').style.display = 'block';
+            if (category === 'transfer') document.getElementById('state-transfer').style.display = 'block';
+            if (category === 'withdrawal') document.getElementById('state-withdrawal').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

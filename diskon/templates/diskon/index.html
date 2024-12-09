@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    {% csrf_token %}
+
+    <h2 class="mb-4">Diskon</h2>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Voucher Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="card-title mb-0">Voucher</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Potongan</th>
+                            <th>Min Transaksi Pemesanan</th>
+                            <th>Jumlah Hari Berlaku</th>
+                            <th>Kuota Penggunaan</th>
+                            <th>Harga</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for voucher in vouchers %}
+                        <tr>
+                            <td>{{ voucher.kode }}</td>
+                            <td>{{ voucher.potongan }}%</td>
+                            <td>Rp {{ voucher.mintrpemesanan|floatformat:0 }}</td>
+                            <td>{{ voucher.jmlhariberlaku }} hari</td>
+                            <td>{{ voucher.kuotapenggunaan }}x</td>
+                            <td>Rp {{ voucher.harga|floatformat:0 }}</td>
+                            <td>
+                                {% if request.session.user.role == 'pengguna' %}
+                                <button
+                                    class="btn btn-primary btn-sm buy-voucher"
+                                    data-kode="{{ voucher.kode }}"
+                                    data-harga="{{ voucher.harga }}"
+                                    data-hari="{{ voucher.jmlhariberlaku }}"
+                                    data-kuota="{{ voucher.kuotapenggunaan }}"
+                                >
+                                    Beli
+                                </button>
+                                {% else %}
+                                <button class="btn btn-secondary btn-sm" disabled>Beli</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promo Section -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title mb-0">Promo</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Potongan</th>
+                            <th>Min Transaksi Pemesanan</th>
+                            <th>Tanggal Akhir Berlaku</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for promo in promos %}
+                        <tr>
+                            <td>{{ promo.kode }}</td>
+                            <td>{{ promo.potongan }}%</td>
+                            <td>Rp {{ promo.mintrpemesanan|floatformat:0 }}</td>
+                            <td>{{ promo.tglakhirberlaku|date:"d M Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.buy-voucher').forEach(button => {
+    button.addEventListener('click', function() {
+        const kode = this.dataset.kode;
+        const harga = parseInt(this.dataset.harga).toLocaleString('id-ID');
+        const hari = this.dataset.hari;
+        const kuota = this.dataset.kuota;
+
+        Swal.fire({
+            title: 'Beli Voucher',
+            html: `
+                <p>Detail Voucher:</p>
+                <ul class="text-start">
+                    <li>Kode: ${kode}</li>
+                    <li>Harga: Rp ${harga}</li>
+                    <li>Berlaku: ${hari} hari</li>
+                    <li>Kuota: ${kuota}x penggunaan</li>
+                </ul>
+                <div class="form-group mt-3">
+                    <label for="metode-bayar">Pilih Metode Pembayaran:</label>
+                    <select class="form-select mt-2" id="metode-bayar" required>
+                        <option value="" disabled selected>Pilih metode pembayaran</option>
+                        {% for m in metode_bayar %}
+                            <option value="{{ m.id }}">{{ m.nama }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Beli',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            preConfirm: () => {
+                const metodeBayarId = document.getElementById('metode-bayar').value;
+                if (!metodeBayarId) {
+                    Swal.showValidationMessage('Silakan pilih metode pembayaran');
+                }
+                return { metodeBayarId };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/diskon/beli/${kode}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        metode_bayar_id: result.value.metodeBayarId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            html: `
+                                <p>${data.message}</p>
+                                <p class="mt-2">Voucher kode <strong>${kode}</strong> telah ditambahkan ke akun Anda.</p>
+                                ${data.saldo_baru ? `<p class="mt-2">Saldo MyPay Anda sekarang: Rp ${parseInt(data.saldo_baru).toLocaleString('id-ID')}</p>` : ''}
+                            `,
+                            icon: 'success'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error!', data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    Swal.fire('Error!', 'Terjadi kesalahan saat membeli voucher', 'error');
+                    console.error('Error:', error);
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
