@@ -26,5 +26,8 @@ urlpatterns = [
     path('diskon/', include('diskon.urls')),  # URL untuk diskon
     path('mypay/', include('mypay.urls')),  # Tambahkan ini
     path('pekerjaan/', include('pekerjaan.urls')),  # Tambahkan ini
+    path('homepage/', include('homepage.urls')),  # Tambahkan ini
+    path('subkategori_jasa/', include('subkategori_jasa.urls')),
+    path('pemesanan_jasa/', include('pemesanan_jasa.urls')),
 
 ]

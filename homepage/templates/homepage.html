@@ -2,33 +2,98 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Category List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .category, .subcategory { margin: 10px 0; }
-        .category { font-weight: bold; }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .dropdown-filter {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .category-card {
+            margin-bottom: 20px;
+        }
+        .category-header {
+            background-color: #f8f9fa;
+            padding: 10px;
+            font-weight: bold;
+            border: 1px solid #ddd;
+        }
+        .subcategory-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+        .subcategory-item:first-child {
+            border-top: 1px solid #ddd;
+        }
+        .subcategory-item:hover {
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <form method="get" action="{% url 'category_list' %}">
-        <select name="category">
-            <option value="">Select Category</option>
-            {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
-            {% endfor %}
-        </select>
-        <input type="text" name="subcategory" placeholder="Nama Subkategori">
-        <button type="submit">Search</button>
-    </form>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">MyPay</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/homepage/">Homepage</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/mypay/">MyPay</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/diskon/">Diskon</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/profil/">Profil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout/">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <div>
-        {% for category in categories %}
-            <div class="category">{{ category.name }}</div>
-            <ul>
-                {% for subcategory in category.subcategories.all %}
-                    <li class="subcategory">{{ subcategory.name }}</li>
+    <!-- Homepage -->
+    <div class="container mt-4">
+        <h1 class="section-title">Homepage</h1>
+
+        <!-- Dropdown dan Search -->
+        <div class="dropdown-filter">
+            <select class="form-select me-2" style="width: 200px;" id="kategori-dropdown" name="kategori">
+                <option value="" selected>Pilih Kategori</option>
+                {% for kategori in kategori_list %}
+                <option value="{{ kategori.id }}">{{ kategori.nama }}</option>
                 {% endfor %}
-            </ul>
-        {% endfor %}
+            </select>
+            <input type="text" class="form-control" style="width: 300px;" placeholder="Cari subkategori" id="subkategori-search" name="subkategori">
+            <button class="btn btn-primary ms-2" type="button">Search</button>
+        </div>
+
+        <!-- List Kategori dan Subkategori -->
+        <div class="category-list">
+            {% for kategori in kategori_list %}
+            <div class="category-card">
+                <div class="category-header">{{ kategori.nama }}</div>
+                {% for subkategori in kategori.subkategori_list %}
+                <div class="subcategory-item">
+                    <a href="/subkategori/{{ subkategori.id }}/" class="text-decoration-none text-dark">{{ subkategori.nama }}</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
     </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
