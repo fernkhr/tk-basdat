@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Diskon</h2>
+
+    <!-- Voucher Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="card-title mb-0">Voucher</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Potongan</th>
+                            <th>Min Transaksi Pemesanan</th>
+                            <th>Jumlah Hari Berlaku</th>
+                            <th>Kuota Penggunaan</th>
+                            <th>Harga</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for voucher in vouchers %}
+                        <tr>
+                            <td>{{ voucher.kode }}</td>
+                            <td>{{ voucher.potongan }}%</td>
+                            <td>Rp {{ voucher.mintrpemesanan|floatformat:0 }}</td>
+                            <td>{{ voucher.jmlhariberlaku }} hari</td>
+                            <td>{{ voucher.kuotapenggunaan }}x</td>
+                            <td>Rp {{ voucher.harga|floatformat:0 }}</td>
+                            <td>
+                                <button
+                                    class="btn btn-primary btn-sm buy-voucher"
+                                    data-kode="{{ voucher.kode }}"
+                                    data-harga="{{ voucher.harga }}"
+                                >
+                                    Beli
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promo Section -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title mb-0">Promo</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Potongan</th>
+                            <th>Min Transaksi Pemesanan</th>
+                            <th>Tanggal Akhir Berlaku</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for promo in promos %}
+                        <tr>
+                            <td>{{ promo.kode }}</td>
+                            <td>{{ promo.potongan }}%</td>
+                            <td>Rp {{ promo.mintrpemesanan|floatformat:0 }}</td>
+                            <td>{{ promo.tglakhirberlaku|date:"d M Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.buy-voucher').forEach(button => {
+    button.addEventListener('click', function() {
+        const kode = this.dataset.kode;
+        const harga = this.dataset.harga;
+
+        Swal.fire({
+            title: 'Beli Voucher',
+            text: `Apakah Anda yakin ingin membeli voucher ${kode} seharga Rp ${harga}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Beli',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/diskon/beli/${kode}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire('Berhasil!', 'Voucher berhasil dibeli', 'success')
+                        .then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error!', data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    Swal.fire('Error!', 'Terjadi kesalahan saat membeli voucher', 'error');
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

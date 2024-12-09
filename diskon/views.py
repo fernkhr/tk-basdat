@@ -1,45 +1,71 @@
+from django.http import JsonResponse
 from django.shortcuts import render
+from django.db import connection
+from datetime import datetime
+
 
 def diskon_view(request):
-    """
-    View untuk menampilkan daftar diskon (voucher dan promo).
-    """
-    # Dummy data untuk voucher
-    voucher_data = [
-        {"kode": "VCR001", "potongan": "20%", "harga": "Rp 50.000", "hari_berlaku": 30, "kuota": 100},
-        {"kode": "VCR002", "potongan": "10%", "harga": "Rp 25.000", "hari_berlaku": 15, "kuota": 50},
-    ]
+    with connection.cursor() as cursor:
+        # Ambil data voucher
+        cursor.execute("""
+            SELECT 
+                v.Kode,
+                d.Potongan,
+                d.MinTrPemesanan,
+                v.JmlHariBerlaku,
+                v.KuotaPenggunaan,
+                v.Harga
+            FROM VOUCHER v
+            JOIN DISKON d ON v.Kode = d.Kode
+            ORDER BY v.Kode
+        """)
+        vouchers = [dict(zip([col[0] for col in cursor.description], row))
+                    for row in cursor.fetchall()]
 
-    # Dummy data untuk promo
-    promo_data = [
-        {"kode": "PRM001", "tanggal_berlaku": "2024-12-31"},
-        {"kode": "PRM002", "tanggal_berlaku": "2024-11-30"},
-    ]
+        # Ambil data promo
+        cursor.execute("""
+            SELECT 
+                p.Kode,
+                d.Potongan,
+                d.MinTrPemesanan,
+                p.TglAkhirBerlaku
+            FROM PROMO p
+            JOIN DISKON d ON p.Kode = d.Kode
+            ORDER BY p.TglAkhirBerlaku DESC
+        """)
+        promos = [dict(zip([col[0] for col in cursor.description], row))
+                  for row in cursor.fetchall()]
 
-    context = {
-        "voucher_data": voucher_data,
-        "promo_data": promo_data,
-    }
-    return render(request, 'diskon.html', context)
+    return render(request, 'diskon/index.html', {
+        'vouchers': vouchers,
+        'promos': promos
+    })
+
 
 def beli_voucher_view(request, kode_voucher):
-    """
-    View untuk halaman pembelian voucher.
-    TODO: Tambahkan logic backend untuk memvalidasi saldo pengguna.
-    """
-    # Dummy data sukses/gagal (hard-coded untuk sementara)
-    saldo_cukup = True  # Ubah ke False untuk melihat pesan gagal
+    if request.method == 'POST':
+        with connection.cursor() as cursor:
+            # Ambil data voucher
+            cursor.execute("""
+                SELECT 
+                    v.Kode,
+                    v.Harga,
+                    v.JmlHariBerlaku,
+                    v.KuotaPenggunaan
+                FROM VOUCHER v
+                WHERE v.Kode = %s
+            """, [kode_voucher])
 
-    if saldo_cukup:
-        context = {
-            "status": "gagal",
-            "kode_voucher": kode_voucher,
-            "hari_berlaku": "30",  # Dummy
-            "kuota": "100",       # Dummy
-        }
-    else:
-        context = {
-            "status": "gagal",
-        }
+            voucher = dict(zip([col[0] for col in cursor.description], cursor.fetchone()))
 
-    return render(request, 'beli_voucher.html', context)
+            if not voucher:
+                return JsonResponse({'status': 'error', 'message': 'Voucher tidak ditemukan'})
+
+            # TODO: Implementasi pembelian voucher
+            # 1. Cek saldo user
+            # 2. Kurangi saldo
+            # 3. Buat record pembelian voucher
+
+            return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'status': 'error', 'message': 'Method not allowed'})
