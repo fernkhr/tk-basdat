@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     'diskon',
     'mypay',
     'pekerjaan',
+    'homepage',
+    'subkategori_jasa',
+    'pemesanan_jasa',
 ]
 
 MIDDLEWARE = [
