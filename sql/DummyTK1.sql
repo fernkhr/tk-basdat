@@ -222,3 +222,112 @@ insert into TESTIMONI (IdTrPemesanan, Tgl, Teks, Rating) values ('70fcb60d-3d13-
 insert into TESTIMONI (IdTrPemesanan, Tgl, Teks, Rating) values ('821ac19c-8bb4-4a9c-a731-fd086039bf73', '2023-12-22', 'innovate wireless content', 15);
 insert into TESTIMONI (IdTrPemesanan, Tgl, Teks, Rating) values ('1e8a5cdb-3147-4cfe-b473-c89800f2c47b', '2024-04-21', 'architect enterprise metrics', 16);
 insert into TESTIMONI (IdTrPemesanan, Tgl, Teks, Rating) values ('ea5fabd6-9daf-4c78-82d9-316ebf3eb498', '2023-12-14', 'extend clicks-and-mortar channels', 17);
+
+
+-- Insert beberapa User
+INSERT INTO "USER" (Nama, JenisKelamin, NoHP, TglLahir) VALUES
+('Sarah Williams', 'P', '081234567801', '1995-03-15'),
+('Michael Chen', 'L', '081234567802', '1992-07-22'),
+('Amanda Davis', 'P', '081234567803', '1988-11-30'),
+('David Wilson', 'L', '081234567804', '1990-05-18');
+
+-- Insert Pelanggan (gunakan SELECT untuk mendapatkan Id dari USER)
+INSERT INTO PELANGGAN (Id, "Level")
+SELECT Id, 'Gold' FROM "USER" WHERE Nama = 'Sarah Williams';
+
+INSERT INTO PELANGGAN (Id, "Level")
+SELECT Id, 'Silver' FROM "USER" WHERE Nama = 'Michael Chen';
+
+-- Insert Pekerja
+INSERT INTO PEKERJA (Id, NamaBank, NomorRekening, Rating)
+SELECT Id, 'Mandiri', '1234567801', 4.8 FROM "USER" WHERE Nama = 'Amanda Davis';
+
+INSERT INTO PEKERJA (Id, NamaBank, NomorRekening, Rating)
+SELECT Id, 'BNI', '1234567802', 4.6 FROM "USER" WHERE Nama = 'David Wilson';
+
+-- Insert Kategori Jasa
+INSERT INTO KATEGORI_JASA (NamaKategori) VALUES
+('Kebersihan Rumah'),
+('Perawatan Pakaian');
+
+-- Insert Subkategori Jasa
+INSERT INTO SUBKATEGORI_JASA (NamaSubkategori, Deskripsi, KategoriJasaId)
+SELECT 'Deep Cleaning', 'Pembersihan menyeluruh rumah', Id
+FROM KATEGORI_JASA WHERE NamaKategori = 'Kebersihan Rumah';
+
+INSERT INTO SUBKATEGORI_JASA (NamaSubkategori, Deskripsi, KategoriJasaId)
+SELECT 'Laundry Premium', 'Layanan cuci setrika premium', Id
+FROM KATEGORI_JASA WHERE NamaKategori = 'Perawatan Pakaian';
+
+-- Insert Sesi Layanan
+INSERT INTO SESI_LAYANAN (SubkategoriId, Sesi, Harga)
+SELECT Id, 1, 250000 FROM SUBKATEGORI_JASA WHERE NamaSubkategori = 'Deep Cleaning'
+UNION ALL
+SELECT Id, 2, 450000 FROM SUBKATEGORI_JASA WHERE NamaSubkategori = 'Deep Cleaning'
+UNION ALL
+SELECT Id, 1, 200000 FROM SUBKATEGORI_JASA WHERE NamaSubkategori = 'Laundry Premium'
+UNION ALL
+SELECT Id, 2, 350000 FROM SUBKATEGORI_JASA WHERE NamaSubkategori = 'Laundry Premium';
+
+-- Insert Status Pesanan
+INSERT INTO STATUS_PESANAN ("Status") VALUES
+('Pesanan Selesai'),
+('Dalam Proses');
+
+-- Insert Metode Bayar
+INSERT INTO METODE_BAYAR (Nama) VALUES
+('Transfer Bank'),
+('E-Wallet');
+
+-- Insert Pesanan Jasa
+WITH pelanggan_sarah AS (SELECT Id FROM "USER" WHERE Nama = 'Sarah Williams'),
+     pelanggan_michael AS (SELECT Id FROM "USER" WHERE Nama = 'Michael Chen'),
+     pekerja_amanda AS (SELECT Id FROM "USER" WHERE Nama = 'Amanda Davis'),
+     pekerja_david AS (SELECT Id FROM "USER" WHERE Nama = 'David Wilson'),
+     subkat_cleaning AS (SELECT Id FROM SUBKATEGORI_JASA WHERE NamaSubkategori = 'Deep Cleaning'),
+     subkat_laundry AS (SELECT Id FROM SUBKATEGORI_JASA WHERE NamaSubkategori = 'Laundry Premium'),
+     metode_transfer AS (SELECT Id FROM METODE_BAYAR WHERE Nama = 'Transfer Bank'),
+     metode_ewallet AS (SELECT Id FROM METODE_BAYAR WHERE Nama = 'E-Wallet')
+INSERT INTO TR_PEMESANAN_JASA (TglPemesanan, TglPekerjaan, WaktuPekerjaan, TotalBiaya, IdPelanggan, IdPekerja, IdKategoriJasa, Sesi, IdMetodeBayar)
+VALUES
+(
+    '2024-01-15', '2024-01-16', '2024-01-16 09:00:00', 250000,
+    (SELECT Id FROM pelanggan_sarah),
+    (SELECT Id FROM pekerja_amanda),
+    (SELECT Id FROM subkat_cleaning),
+    1,
+    (SELECT Id FROM metode_transfer)
+),
+(
+    '2024-01-17', '2024-01-18', '2024-01-18 10:00:00', 350000,
+    (SELECT Id FROM pelanggan_michael),
+    (SELECT Id FROM pekerja_david),
+    (SELECT Id FROM subkat_laundry),
+    2,
+    (SELECT Id FROM metode_ewallet)
+),
+(
+    '2024-01-19', '2024-01-20', '2024-01-20 13:00:00', 450000,
+    (SELECT Id FROM pelanggan_sarah),
+    (SELECT Id FROM pekerja_amanda),
+    (SELECT Id FROM subkat_cleaning),
+    2,
+    (SELECT Id FROM metode_transfer)
+);
+
+-- Insert Status Pemesanan
+INSERT INTO TR_PEMESANAN_STATUS (IdTrPemesanan, IdStatus, TglWaktu)
+SELECT tj.Id, sp.Id, tj.WaktuPekerjaan + interval '6 hours'
+FROM TR_PEMESANAN_JASA tj
+CROSS JOIN STATUS_PESANAN sp
+WHERE sp."Status" = 'Pesanan Selesai';
+
+-- Insert Testimoni untuk 2 pesanan pertama
+INSERT INTO TESTIMONI (IdTrPemesanan, Tgl, Teks, Rating)
+SELECT Id, TglPekerjaan, 'Pelayanan deep cleaning sangat memuaskan, rumah jadi bersih sekali!', 9
+FROM TR_PEMESANAN_JASA
+WHERE TglPemesanan = '2024-01-15'
+UNION ALL
+SELECT Id, TglPekerjaan, 'Laundry premium berkualitas, pakaian wangi dan rapi.', 8
+FROM TR_PEMESANAN_JASA
+WHERE TglPemesanan = '2024-01-17';

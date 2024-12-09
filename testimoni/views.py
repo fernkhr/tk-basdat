@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.db import connection
 from django.http import JsonResponse
 from datetime import datetime
@@ -13,8 +13,8 @@ def index(request):
                 t.Tgl,
                 t.Teks,
                 t.Rating,
-                u1.Nama as NamaPelanggan,
-                u2.Nama as NamaPekerja,
+                u1.Nama as namapelanggan,
+                u2.Nama as namapekerja,
                 s.NamaSubkategori
             FROM TESTIMONI t
             JOIN TR_PEMESANAN_JASA tj ON t.IdTrPemesanan = tj.Id
@@ -26,45 +26,62 @@ def index(request):
         testimoni = [dict(zip([col[0] for col in cursor.description], row))
                      for row in cursor.fetchall()]
 
-    return render(request, 'testimoni/index.html', {'testimoni': testimoni})
+    # Ambil daftar pesanan yang sudah selesai tapi belum ada testimoni
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT 
+                tj.Id,
+                tj.TglPemesanan,
+                tj.TglPekerjaan,
+                tj.TotalBiaya,
+                u.Nama as nama_pekerja,
+                s.NamaSubkategori,
+                sp."Status"
+            FROM TR_PEMESANAN_JASA tj
+            JOIN \"USER\" u ON tj.IdPekerja = u.Id
+            JOIN SUBKATEGORI_JASA s ON tj.IdKategoriJasa = s.Id
+            JOIN TR_PEMESANAN_STATUS tps ON tj.Id = tps.IdTrPemesanan
+            JOIN STATUS_PESANAN sp ON tps.IdStatus = sp.Id
+            WHERE sp."Status" = 'Pesanan Selesai'
+            AND tj.Id NOT IN (SELECT IdTrPemesanan FROM TESTIMONI)
+            ORDER BY tj.TglPekerjaan DESC
+        """)
+        available_orders = [dict(zip([col[0] for col in cursor.description], row))
+                            for row in cursor.fetchall()]
+
+    return render(request, 'testimoni/index.html', {
+        'testimoni': testimoni,
+        'available_orders': available_orders
+    })
 
 
+# Update template create_testimoni
 def create_testimoni(request):
     if request.method == 'POST':
         rating = request.POST.get('rating')
         teks = request.POST.get('komentar')
         id_pemesanan = request.POST.get('id_pemesanan')
 
-        with connection.cursor() as cursor:
-            # Cek apakah pesanan sudah selesai
-            cursor.execute("""
-                SELECT ts.IdStatus 
-                FROM TR_PEMESANAN_STATUS ts
-                JOIN STATUS_PESANAN sp ON ts.IdStatus = sp.Id
-                WHERE ts.IdTrPemesanan = %s 
-                AND sp."Status" = 'Pesanan Selesai'
-            """, [id_pemesanan])
-
-            if not cursor.fetchone():
-                return JsonResponse({'error': 'Pesanan belum selesai'}, status=400)
-
-            # Cek apakah testimoni sudah ada
-            cursor.execute("""
-                SELECT IdTrPemesanan FROM TESTIMONI 
-                WHERE IdTrPemesanan = %s
-            """, [id_pemesanan])
-
-            if cursor.fetchone():
-                return JsonResponse({'error': 'Testimoni sudah ada'}, status=400)
-
-            # Buat testimoni baru
-            cursor.execute("""
-                INSERT INTO TESTIMONI (IdTrPemesanan, Tgl, Teks, Rating)
-                VALUES (%s, %s, %s, %s)
-            """, [id_pemesanan, datetime.now(), teks, rating])
-
-        return JsonResponse({'success': True})
-
     # GET request - tampilkan form
     id_pemesanan = request.GET.get('id_pemesanan')
-    return render(request, 'testimoni/create.html', {'id_pemesanan': id_pemesanan})
+
+    # Ambil detail pesanan
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT 
+                tj.Id,
+                tj.TglPekerjaan,
+                tj.TotalBiaya,
+                u.Nama as nama_pekerja,
+                s.NamaSubkategori
+            FROM TR_PEMESANAN_JASA tj
+            JOIN \"USER\" u ON tj.IdPekerja = u.Id
+            JOIN SUBKATEGORI_JASA s ON tj.IdKategoriJasa = s.Id
+            WHERE tj.Id = %s
+        """, [id_pemesanan])
+        order_detail = dict(zip([col[0] for col in cursor.description], cursor.fetchone()))
+
+    return render(request, 'testimoni/create.html', {
+        'id_pemesanan': id_pemesanan,
+        'order_detail': order_detail
+    })
