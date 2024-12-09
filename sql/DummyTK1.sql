@@ -331,3 +331,17 @@ UNION ALL
 SELECT Id, TglPekerjaan, 'Laundry premium berkualitas, pakaian wangi dan rapi.', 8
 FROM TR_PEMESANAN_JASA
 WHERE TglPemesanan = '2024-01-17';
+
+-- Insert kategori transaksi MyPay jika belum ada
+INSERT INTO KATEGORI_TR_MYPAY (Nama)
+SELECT 'Pembelian Voucher'
+WHERE NOT EXISTS (
+    SELECT 1 FROM KATEGORI_TR_MYPAY WHERE Nama = 'Pembelian Voucher'
+);
+
+-- Insert metode bayar MyPay jika belum ada
+INSERT INTO METODE_BAYAR (Nama)
+SELECT 'MyPay'
+WHERE NOT EXISTS (
+    SELECT 1 FROM METODE_BAYAR WHERE Nama = 'MyPay'
+);

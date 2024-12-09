@@ -1,10 +1,16 @@
 from django.shortcuts import render
 from django.db import connection
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from datetime import datetime
 
 
 def index(request):
+    if not request.session.has_key("user"):
+        return HttpResponseRedirect('/login')
+    else :
+        user_session = request.session["user"]
+        role = user_session.get("role")
+
     with connection.cursor() as cursor:
         # Ambil semua testimoni dengan detail user dan pekerja
         cursor.execute("""
@@ -57,6 +63,12 @@ def index(request):
 
 # Update template create_testimoni
 def create_testimoni(request):
+    if not request.session.has_key("user"):
+        return HttpResponseRedirect('/login')
+    else :
+        user_session = request.session["user"]
+        role = user_session.get("role")
+
     if request.method == 'POST':
         try:
             rating = request.POST.get('rating')
