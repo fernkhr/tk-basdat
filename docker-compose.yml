@@ -1,0 +1,15 @@
+services:
+  web:
+    build: .
+    command: gunicorn tkbasdat.wsgi:application --bind 0.0.0.0:9000
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+    ports:
+      - "9000:9000"
+    environment:
+      - DEBUG=False
+      - DJANGO_SETTINGS_MODULE=tkbasdat.settings
+
+volumes:
+  static_volume:
